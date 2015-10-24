@@ -11424,6 +11424,13 @@ public final class Settings {
         public static final String ADAPTIVE_CONNECTIVITY_ENABLED = "adaptive_connectivity_enabled";
 
         /**
+         * Whether to show media art on lockscreen
+         * Boolean setting. 0 = off, 1 = on.
+         * @hide
+         */
+        public static final String LOCKSCREEN_MEDIA_METADATA = "lockscreen_media_metadata";
+
+        /**
          * Controls the 'Sunlight boost' toggle in wearable devices (high brightness mode).
          *
          * Valid values for this key are: '0' (disabled) or '1' (enabled).
