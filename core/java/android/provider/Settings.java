@@ -11140,6 +11140,11 @@ public final class Settings {
         @Readable
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
         
+        /**
+         * boolean value. toggles swipe up hint in gestural nav mode
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_HINT = "navigation_bar_hint";
     }
 
     /**
