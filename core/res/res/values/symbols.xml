@@ -5135,4 +5135,9 @@
 
   <!-- For dynamic default font styles -->
   <java-symbol type="string" name="config_bodyFontFamily" />
+
+  <!-- PropImitationHooks -->
+  <java-symbol type="string" name="config_certifiedFingerprint" />
+  <java-symbol type="string" name="config_stockFingerprint" />
+
 </resources>
