@@ -5934,4 +5934,10 @@
          TODO(b/236022708) Move rear display state to device state config file
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
+
+    <!-- Build fingerprint from a GMS certified device (against current platform SPL) -->
+    <string name="config_certifiedFingerprint" translatable="false">google/raven/raven:13/TP1A.220624.021/8877034:user/release-keys</string>
+
+    <!-- Build fingerprint from stock ROM -->
+    <string name="config_stockFingerprint" translatable="false"></string>
 </resources>
