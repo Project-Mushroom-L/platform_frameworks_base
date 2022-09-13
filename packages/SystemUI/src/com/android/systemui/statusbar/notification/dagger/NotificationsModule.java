@@ -133,6 +133,7 @@ public interface NotificationsModule {
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
+            NotificationEntryManager.KeyguardEnvironment keyguardEnvironment,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager) {
@@ -143,6 +144,7 @@ public interface NotificationsModule {
                 notificationRowBinderLazy,
                 notificationRemoteInputManagerLazy,
                 leakDetector,
+                keyguardEnvironment,
                 statusBarService,
                 notifLiveDataStore,
                 dumpManager);

@@ -30,6 +30,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -61,6 +62,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.leak.LeakDetector;
@@ -105,6 +107,11 @@ public class NotificationEntryManager implements
         VisualStabilityManager.Callback {
 
     private final NotificationEntryManagerLogger mLogger;
+    private final KeyguardEnvironment mKeyguardEnvironment;
+
+    // We need reference to status bar for notification ticker
+    private CentralSurfacesImpl mCentralSurfaces;
+
     private final NotificationGroupManagerLegacy mGroupManager;
     private final NotifPipelineFlags mNotifPipelineFlags;
     private final Lazy<NotificationRowBinder> mNotificationRowBinderLazy;
@@ -157,6 +164,7 @@ public class NotificationEntryManager implements
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
+            KeyguardEnvironment keyguardEnvironment,
             IStatusBarService statusBarService,
             NotifLiveDataStoreImpl notifLiveDataStore,
             DumpManager dumpManager
@@ -169,6 +177,7 @@ public class NotificationEntryManager implements
         mLeakDetector = leakDetector;
         mStatusBarService = statusBarService;
         mNotifLiveDataStore = notifLiveDataStore;
+        mKeyguardEnvironment = keyguardEnvironment;
         mDumpManager = dumpManager;
     }
 
@@ -696,6 +705,21 @@ public class NotificationEntryManager implements
             return;
         }
 
+        Notification n = notification.getNotification();
+        boolean isForCurrentUser = mKeyguardEnvironment
+                .isNotificationForCurrentProfiles(notification);
+        if (DEBUG) {
+            // Is this for you?
+            Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
+        }
+
+        if (mCentralSurfaces != null && isForCurrentUser) {
+            mCentralSurfaces.updateLyricTicker(notification);
+        }
+        if ((n.flags & Notification.FLAG_ONLY_UPDATE_TICKER) != 0) {
+            return;
+        }
+
         // Notification is updated so it is essentially re-added and thus alive again.  Don't need
         // to keep its lifetime extended.
         cancelLifetimeExtension(entry);
@@ -722,6 +746,10 @@ public class NotificationEntryManager implements
         }
 
         updateNotifications("updateNotificationInternal");
+
+        boolean updateTicker = oldSbn.getNotification().tickerText != null
+                && !TextUtils.equals(oldSbn.getNotification().tickerText,
+                entry.getSbn().getNotification().tickerText);
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPostEntryUpdated(entry);
@@ -1069,4 +1097,9 @@ public class NotificationEntryManager implements
      * (e.g. {@link NotificationListenerService#REASON_CANCEL})
      */
     public static final int UNDEFINED_DISMISS_REASON = 0;
+
+    public void setStatusBar(CentralSurfacesImpl centralSurfaces) {
+        mCentralSurfaces = centralSurfaces;
+    }
+
 }

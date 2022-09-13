@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -431,6 +432,8 @@ public class NotificationMediaManager implements Dumpable {
 
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged;
+        NotificationEntry mediaNotification = null;
+	final Optional<CentralSurfacesImpl> centralSurfacesOptional = mCentralSurfacesOptionalLazy.get();
         if (mUsingNotifPipeline) {
             // TODO(b/169655907): get the semi-filtered notifications for current user
             Collection<NotificationEntry> allNotifications = mNotifPipeline.getAllNotifs();
@@ -443,6 +446,19 @@ public class NotificationMediaManager implements Dumpable {
 
             if (metaDataChanged) {
                 mEntryManager.updateNotifications("NotificationMediaManager - metaDataChanged");
+            if (PlaybackState.STATE_PLAYING ==
+                    getMediaControllerPlaybackState(mMediaController) &&
+                    centralSurfacesOptional.map(CentralSurfacesImpl::isMusicTickerEnabled).orElse(false) &&
+                    mediaNotification != null && mMediaMetadata != null) {
+                StatusBarNotification entry = mediaNotification.getSbn();
+                mMainExecutor.executeDelayed(() -> {
+                    mCentralSurfacesOptionalLazy.get().ifPresent(
+			centralSurfaces -> centralSurfaces.tick(entry, true, true, mMediaMetadata, null)
+		    );
+                }, 600);
+            } else {
+                mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfacesImpl::resetTrackInfo);
+            }
             }
 
         }

@@ -144,6 +144,8 @@ class NotificationsControllerImpl @Inject constructor(
             }
 
             entryManager.initialize(notificationListener, legacyRanker)
+            entryManager.setStatusBar(centralSurfaces)
+            headsUpController.setStatusBar(centralSurfaces)
         }
 
         peopleSpaceWidgetManager.attach(notificationListener)
