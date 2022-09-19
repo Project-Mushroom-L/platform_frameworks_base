@@ -62,7 +62,7 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
-import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
@@ -114,7 +114,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mNotificationIconAreaInner;
     private int mDisabled1;
     private int mDisabled2;
-    private Lazy<Optional<CentralSurfacesImpl>> mCentralSurfacesOptionalLazy;
+    private Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private DarkIconManager mDarkIconManager;
     private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final CommandQueue mCommandQueue;
@@ -183,7 +183,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             NotificationIconAreaController notificationIconAreaController,
             PanelExpansionStateManager panelExpansionStateManager,
             FeatureFlags featureFlags,
-	    Lazy<Optional<CentralSurfacesImpl>> centralSurfacesOptionalLazy,
+	    Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarIconController statusBarIconController,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,

@@ -32,7 +32,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -54,7 +54,7 @@ public class HeadsUpController {
     private final HeadsUpManager mHeadsUpManager;
 
     // We need reference to status bar for notification ticker
-    private CentralSurfacesImpl mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
 
     @Inject
     HeadsUpController(
@@ -189,7 +189,7 @@ public class HeadsUpController {
         }
     };
 
-    public void setStatusBar(CentralSurfacesImpl centralSurfaces) {
+    public void setStatusBar(CentralSurfaces centralSurfaces) {
         mCentralSurfaces = centralSurfaces;
     }
 

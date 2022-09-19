@@ -33,6 +33,8 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.window.SplashScreen;
+import android.widget.ImageSwitcher;
+import android.media.MediaMetadata;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -51,6 +53,8 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.Ticker;
+import com.android.systemui.statusbar.phone.TickerView;
 
 import java.io.PrintWriter;
 
@@ -574,6 +578,27 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     float getDisplayDensity();
 
     void extendDozePulse();
+
+    void createLyricTicker(Context ctx, View statusBarView,
+                      TickerView tickerTextView, ImageSwitcher tickerIcon, View tickerView);
+
+    boolean isDeviceProvisioned();
+
+    void tick(StatusBarNotification n, boolean firstTime, boolean isMusic,
+               MediaMetadata metaMediaData, String notificationText);
+
+    void updateLyricTicker(StatusBarNotification n);
+
+    boolean isMusicTickerEnabled();
+
+    void resetTrackInfo();
+
+    void haltLyricTicker();
+
+    boolean isNotificationForCurrentProfiles(StatusBarNotification n);
+
+    @Override
+    void onTuningChanged(String key, String newValue);
 
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;

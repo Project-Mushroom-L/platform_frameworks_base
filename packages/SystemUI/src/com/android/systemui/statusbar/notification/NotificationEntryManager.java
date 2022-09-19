@@ -62,7 +62,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Di
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.leak.LeakDetector;
@@ -110,7 +110,7 @@ public class NotificationEntryManager implements
     private final KeyguardEnvironment mKeyguardEnvironment;
 
     // We need reference to status bar for notification ticker
-    private CentralSurfacesImpl mCentralSurfaces;
+    private CentralSurfaces mCentralSurfaces;
 
     private final NotificationGroupManagerLegacy mGroupManager;
     private final NotifPipelineFlags mNotifPipelineFlags;
@@ -1098,7 +1098,7 @@ public class NotificationEntryManager implements
      */
     public static final int UNDEFINED_DISMISS_REASON = 0;
 
-    public void setStatusBar(CentralSurfacesImpl centralSurfaces) {
+    public void setStatusBar(CentralSurfaces centralSurfaces) {
         mCentralSurfaces = centralSurfaces;
     }
 
