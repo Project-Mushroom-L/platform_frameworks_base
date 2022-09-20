@@ -571,6 +571,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final MessageRouter mMessageRouter;
     private final WallpaperManager mWallpaperManager;
+    private final TunerService mTunerService;
 
     private CentralSurfacesComponent mCentralSurfacesComponent;
 
@@ -809,6 +810,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             @Main MessageRouter messageRouter,
             WallpaperManager wallpaperManager,
             Optional<StartingSurface> startingSurfaceOptional,
+	    TunerService tunerService,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotifPipelineFlags notifPipelineFlags,
             InteractionJankMonitor jankMonitor,
@@ -900,6 +902,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mMainExecutor = delayableExecutor;
         mMessageRouter = messageRouter;
         mWallpaperManager = wallpaperManager;
+	mTunerService = tunerService;
         mJankMonitor = jankMonitor;
         mDreamOverlayStateController = dreamOverlayStateController;
 
