@@ -1628,4 +1628,7 @@
     <dimen name="rear_display_animation_height">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
+
+    <!-- Bluetooth dialog -->
+    <dimen name="bluetooth_dialog_active_device_bottom_margin">4dp</dimen>
 </resources>

@@ -2768,4 +2768,9 @@
 
     <!-- Title for notification of low stylus battery. [CHAR_LIMIT=NONE] -->
     <string name="stylus_battery_low">Stylus battery low</string>
+
+    <!-- Bluetooth dialog -->
+    <string name="turn_on_bluetooth">Use Bluetooth</string>
+    <string name="bluetooth_is_off">Bluetooth is off</string>
+    <string name="tap_a_device_to_connect">Tap a device to connect</string>
 </resources>
