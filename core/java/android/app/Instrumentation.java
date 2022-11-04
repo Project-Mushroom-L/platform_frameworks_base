@@ -1286,7 +1286,7 @@ public class Instrumentation {
         app.attach(context);
         String packageName = app.getPackageName();
         PropsUtils.setProps(packageName);
-        PropImitationHooks.setProps(app);
+        PropImitationHooks.setProps(context);
         return app;
     }
     
@@ -1306,7 +1306,7 @@ public class Instrumentation {
         app.attach(context);
         String packageName = app.getPackageName();
         PropsUtils.setProps(packageName);
-        PropImitationHooks.setProps(app);
+        PropImitationHooks.setProps(context);
         return app;
     }
 
