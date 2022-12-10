@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
@@ -122,16 +123,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     @Override
     public int getTilesHeight() {
-        // Find the maximum height among all pages.
-        int height = 0;
-        for (int i = 0; i < mPages.size(); i++) {
-            TileLayout tileLayout = mPages.get(i);
-            if (tileLayout != null) {
-                height = Math.max(height, tileLayout.getTilesHeight());
-            }
+        // Use the first page as that is the maximum height we need to show.
+        TileLayout tileLayout = mPages.get(0);
+        if (tileLayout == null) {
+            return 0;
         }
-        if (DEBUG) Log.d(TAG, "getTilesHeight ret=" + height);
-        return height;
+        return tileLayout.getTilesHeight();
     }
 
     @Override
@@ -287,6 +284,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 .inflate(R.layout.qs_paged_page, this, false);
         page.setMinRows(mMinRows);
         page.setMaxColumns(mMaxColumns);
+        page.setSelected(false);
         return page;
     }
 
@@ -626,6 +624,16 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         if (getCurrentItem() != mPages.size() - 1) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_PAGE_RIGHT);
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        if (mAdapter != null && mAdapter.getCount() > 0) {
+            event.setItemCount(mAdapter.getCount());
+            event.setFromIndex(getCurrentPageNumber());
+            event.setToIndex(getCurrentPageNumber());
         }
     }
 
