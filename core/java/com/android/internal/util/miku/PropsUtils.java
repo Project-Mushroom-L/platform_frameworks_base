@@ -56,10 +56,10 @@ public class PropsUtils {
         propsToChange = new HashMap<>();
         propsToChange.put("BRAND", "google");
         propsToChange.put("MANUFACTURER", "Google");
-        propsToChange.put("DEVICE", "redfin");
-        propsToChange.put("PRODUCT", "redfin");
-        propsToChange.put("MODEL", "Pixel 5");
-        propsToChange.put("FINGERPRINT", "google/redfin/redfin:13/TP1A.221105.002/9080065:user/release-keys");
+        propsToChange.put("DEVICE", "cheetah");
+        propsToChange.put("PRODUCT", "cheetah");
+        propsToChange.put("MODEL", "Pixel 7 Pro");
+        propsToChange.put("FINGERPRINT", "google/cheetah/cheetah:13/TQ1A.221205.011/9244662:user/release-keys");
 	propsToChangeMeizu = new HashMap<>();
 	propsToChangeMeizu.put("BRAND", "meizu");
 	propsToChangeMeizu.put("MANUFACTURER", "meizu");
