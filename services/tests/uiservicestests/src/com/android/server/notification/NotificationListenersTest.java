@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 package com.android.server.notification;
-
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_CONVERSATIONS;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_SILENT;
-
 import static com.android.server.notification.NotificationManagerService.NotificationListeners.TAG_REQUESTED_LISTENERS;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,7 +34,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -62,53 +56,40 @@ import android.util.Pair;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
-
 import com.android.server.UiServiceTestCase;
-
 import com.google.common.collect.ImmutableList;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.util.reflection.FieldSetter;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
-
 public class NotificationListenersTest extends UiServiceTestCase {
-
     @Mock
     private PackageManager mPm;
     @Mock
     private IPackageManager miPm;
-
     @Mock
     NotificationManagerService mNm;
     @Mock
     private INotificationManager mINm;
     private TestableContext mContext = spy(getContext());
-
     NotificationManagerService.NotificationListeners mListeners;
-
     private ComponentName mCn1 = new ComponentName("pkg", "pkg.cmp");
     private ComponentName mCn2 = new ComponentName("pkg2", "pkg2.cmp2");
-
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         getContext().setMockPackageManager(mPm);
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
-
         mListeners = spy(mNm.new NotificationListeners(
                 mContext, new Object(), mock(ManagedServices.UserProfiles.class), miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
     }
-
     @Test
     public void testReadExtraTag() throws Exception {
         String xml = "<" + TAG_REQUESTED_LISTENERS+ ">"
@@ -120,16 +101,13 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 + "<disallowed pkg=\"pkg1\" uid=\"243\"/>"
                 + "</listener>"
                 + "</" + TAG_REQUESTED_LISTENERS + ">";
-
         TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
         mListeners.readExtraTag(TAG_REQUESTED_LISTENERS, parser);
-
         validateListenersFromXml();
     }
-
     @Test
     public void testWriteExtraTag() throws Exception {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
@@ -138,7 +116,6 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 10), nlf2);
-
         TypedXmlSerializer serializer = Xml.newFastSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
@@ -146,23 +123,19 @@ public class NotificationListenersTest extends UiServiceTestCase {
         mListeners.writeExtraXmlTags(serializer);
         serializer.endDocument();
         serializer.flush();
-
         TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
         mListeners.readExtraTag("req_listeners", parser);
-
         validateListenersFromXml();
     }
-
     private void validateListenersFromXml() {
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0)).getTypes())
                 .isEqualTo(7);
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))
                 .getDisallowedPackages())
                 .isEmpty();
-
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 10)).getTypes())
                 .isEqualTo(4);
         VersionedPackage a1 = new VersionedPackage("pkg1", 243);
@@ -170,7 +143,6 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .getDisallowedPackages())
                 .contains(a1);
     }
-
     @Test
     public void testOnUserRemoved() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
@@ -179,25 +151,19 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 10), nlf2);
-
         mListeners.onUserRemoved(0);
-
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))).isNull();
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 10)).getTypes())
                 .isEqualTo(4);
     }
-
     @Test
     public void testEnsureFilters_newServiceNoMetadata() {
         ServiceInfo si = new ServiceInfo();
         si.packageName = "new2";
         si.name = "comp2";
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))).isNull();
     }
-
     @Test
     public void testEnsureFilters_preExisting() {
         // one exists already, say from xml
@@ -208,12 +174,9 @@ public class NotificationListenersTest extends UiServiceTestCase {
         ServiceInfo siOld = new ServiceInfo();
         siOld.packageName = mCn2.getPackageName();
         siOld.name = mCn2.getClassName();
-
         mListeners.ensureFilters(siOld, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0))).isEqualTo(nlf);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata() {
         ServiceInfo si = new ServiceInfo();
@@ -221,14 +184,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1|2");
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata_namesNotNumbers() {
         ServiceInfo si = new ServiceInfo();
@@ -237,14 +197,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES,
                 "conversations|ALERTING");
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_CONVERSATIONS | FLAG_FILTER_TYPE_ALERTING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata_onlyOneListed() {
         ServiceInfo si = new ServiceInfo();
@@ -252,14 +209,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putInt(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, 2);
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_ALERTING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata_disabledTypes() {
         ServiceInfo si = new ServiceInfo();
@@ -267,14 +221,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, "1|2");
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata_disabledTypes_mixedText() {
         ServiceInfo si = new ServiceInfo();
@@ -283,14 +234,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES,
                 "1|alerting");
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_SILENT | FLAG_FILTER_TYPE_ONGOING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithMetadata_metaDataDisagrees() {
         ServiceInfo si = new ServiceInfo();
@@ -299,14 +247,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "1|2");
         si.metaData.putInt(NotificationListenerService.META_DATA_DISABLED_FILTER_TYPES, 1);
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(FLAG_FILTER_TYPE_ALERTING);
     }
-
     @Test
     public void testEnsureFilters_newServiceWithEmptyMetadata() {
         ServiceInfo si = new ServiceInfo();
@@ -314,14 +259,11 @@ public class NotificationListenersTest extends UiServiceTestCase {
         si.name = "comp";
         si.metaData = new Bundle();
         si.metaData.putString(NotificationListenerService.META_DATA_DEFAULT_FILTER_TYPES, "");
-
         mListeners.ensureFilters(si, 0);
-
         assertThat(mListeners.getNotificationListenerFilter(
                 Pair.create(si.getComponentName(), 0)).getTypes())
                 .isEqualTo(0);
     }
-
     @Test
     public void testOnPackageChanged() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
@@ -330,18 +272,15 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 10), nlf2);
-
         String[] pkgs = new String[] {mCn1.getPackageName()};
         int[] uids = new int[] {1};
         mListeners.onPackagesChanged(false, pkgs, uids);
-
         // not removing; no change
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0)).getTypes())
                 .isEqualTo(7);
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 10)).getTypes())
                 .isEqualTo(4);
     }
-
     @Test
     public void testOnPackageChanged_removing() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
@@ -350,17 +289,14 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 0), nlf2);
-
         String[] pkgs = new String[] {mCn1.getPackageName()};
         int[] uids = new int[] {1};
         mListeners.onPackagesChanged(true, pkgs, uids);
-
         // only mCn1 removed
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))).isNull();
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn2, 0)).getTypes())
                 .isEqualTo(4);
     }
-
     @Test
     public void testOnPackageChanged_removingDisallowedPackage() {
         NotificationListenerFilter nlf = new NotificationListenerFilter(7, new ArraySet<>());
@@ -369,40 +305,32 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 new NotificationListenerFilter(4, new ArraySet<>(new VersionedPackage[] {a1}));
         mListeners.setNotificationListenerFilter(Pair.create(mCn1, 0), nlf);
         mListeners.setNotificationListenerFilter(Pair.create(mCn2, 0), nlf2);
-
         String[] pkgs = new String[] {"pkg1"};
         int[] uids = new int[] {243};
         mListeners.onPackagesChanged(true, pkgs, uids);
-
         assertThat(mListeners.getNotificationListenerFilter(Pair.create(mCn1, 0))
                 .getDisallowedPackages()).isEmpty();
     }
-
     @Test
     public void testHasAllowedListener() {
         final int uid1 = 1, uid2 = 2;
         // enable mCn1 but not mCn2 for uid1
         mListeners.addApprovedList(mCn1.flattenToString(), uid1, true);
-
         // verify that:
         // the package for mCn1 has an allowed listener for uid1 and not uid2
         assertTrue(mListeners.hasAllowedListener(mCn1.getPackageName(), uid1));
         assertFalse(mListeners.hasAllowedListener(mCn1.getPackageName(), uid2));
-
         // and that mCn2 has no allowed listeners for either user id
         assertFalse(mListeners.hasAllowedListener(mCn2.getPackageName(), uid1));
         assertFalse(mListeners.hasAllowedListener(mCn2.getPackageName(), uid2));
     }
-
     @Test
     public void testBroadcastUsers() {
         int userId = 0;
         mListeners.setPackageOrComponentEnabled(mCn1.flattenToString(), userId, true, false, true);
-
         verify(mContext).sendBroadcastAsUser(
                 any(), eq(UserHandle.of(userId)), nullable(String.class));
     }
-
     @Test
     public void testImplicitGrant() {
         String pkg = "pkg";
@@ -413,85 +341,106 @@ public class NotificationListenersTest extends UiServiceTestCase {
                 .setContentTitle("foo")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setTimeoutAfter(1);
-
         StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, 8, "tag", uid, 0,
                 nb.build(), UserHandle.getUserHandleForUid(uid), null, 0);
         NotificationRecord r = new NotificationRecord(mContext, sbn, channel);
-
         ManagedServices.ManagedServiceInfo info = mListeners.new ManagedServiceInfo(
                 null, new ComponentName("a", "a"), sbn.getUserId(), false, null, 33, 33);
         List<ManagedServices.ManagedServiceInfo> services = ImmutableList.of(info);
         when(mListeners.getServices()).thenReturn(services);
-
         when(mNm.isVisibleToListener(any(), anyInt(), any())).thenReturn(true);
         when(mNm.makeRankingUpdateLocked(info)).thenReturn(mock(NotificationRankingUpdate.class));
         mNm.mPackageManagerInternal = mPmi;
-
         mListeners.notifyPostedLocked(r, null);
-
         verify(mPmi).grantImplicitAccess(sbn.getUserId(), null, UserHandle.getAppId(33),
                 sbn.getUid(), false, false);
     }
-
     @Test
     public void testNotifyPostedLockedInLockdownMode() {
-        NotificationRecord r = mock(NotificationRecord.class);
-        NotificationRecord old = mock(NotificationRecord.class);
-
-        // before the lockdown mode
-        when(mNm.isInLockDownMode()).thenReturn(false);
-        mListeners.notifyPostedLocked(r, old, true);
-        mListeners.notifyPostedLocked(r, old, false);
-        verify(r, atLeast(2)).getSbn();
-
-        // in the lockdown mode
-        reset(r);
-        reset(old);
-        when(mNm.isInLockDownMode()).thenReturn(true);
-        mListeners.notifyPostedLocked(r, old, true);
-        mListeners.notifyPostedLocked(r, old, false);
-        verify(r, never()).getSbn();
+        NotificationRecord r0 = mock(NotificationRecord.class);
+        NotificationRecord old0 = mock(NotificationRecord.class);
+        UserHandle uh0 = mock(UserHandle.class);
+        NotificationRecord r1 = mock(NotificationRecord.class);
+        NotificationRecord old1 = mock(NotificationRecord.class);
+        UserHandle uh1 = mock(UserHandle.class);
+        // Neither user0 and user1 is in the lockdown mode
+        when(r0.getUser()).thenReturn(uh0);
+        when(uh0.getIdentifier()).thenReturn(0);
+        when(mNm.isInLockDownMode(0)).thenReturn(false);
+        when(r1.getUser()).thenReturn(uh1);
+        when(uh1.getIdentifier()).thenReturn(1);
+        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        mListeners.notifyPostedLocked(r0, old0, true);
+        mListeners.notifyPostedLocked(r0, old0, false);
+        verify(r0, atLeast(2)).getSbn();
+        mListeners.notifyPostedLocked(r1, old1, true);
+        mListeners.notifyPostedLocked(r1, old1, false);
+        verify(r1, atLeast(2)).getSbn();
+        // Reset
+        reset(r0);
+        reset(old0);
+        reset(r1);
+        reset(old1);
+        // Only user 0 is in the lockdown mode
+        when(r0.getUser()).thenReturn(uh0);
+        when(uh0.getIdentifier()).thenReturn(0);
+        when(mNm.isInLockDownMode(0)).thenReturn(true);
+        when(r1.getUser()).thenReturn(uh1);
+        when(uh1.getIdentifier()).thenReturn(1);
+        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        mListeners.notifyPostedLocked(r0, old0, true);
+        mListeners.notifyPostedLocked(r0, old0, false);
+        verify(r0, never()).getSbn();
+        mListeners.notifyPostedLocked(r1, old1, true);
+        mListeners.notifyPostedLocked(r1, old1, false);
+        verify(r1, atLeast(2)).getSbn();
     }
-
-    @Test
-    public void testnotifyRankingUpdateLockedInLockdownMode() {
-        List chn = mock(List.class);
-
-        // before the lockdown mode
-        when(mNm.isInLockDownMode()).thenReturn(false);
-        mListeners.notifyRankingUpdateLocked(chn);
-        verify(chn, atLeast(1)).size();
-
-        // in the lockdown mode
-        reset(chn);
-        when(mNm.isInLockDownMode()).thenReturn(true);
-        mListeners.notifyRankingUpdateLocked(chn);
-        verify(chn, never()).size();
-    }
-
     @Test
     public void testNotifyRemovedLockedInLockdownMode() throws NoSuchFieldException {
-        NotificationRecord r = mock(NotificationRecord.class);
-        NotificationStats rs = mock(NotificationStats.class);
+        NotificationRecord r0 = mock(NotificationRecord.class);
+        NotificationStats rs0 = mock(NotificationStats.class);
+        UserHandle uh0 = mock(UserHandle.class);
+        NotificationRecord r1 = mock(NotificationRecord.class);
+        NotificationStats rs1 = mock(NotificationStats.class);
+        UserHandle uh1 = mock(UserHandle.class);
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         FieldSetter.setField(mNm,
                 NotificationManagerService.class.getDeclaredField("mHandler"),
                 mock(NotificationManagerService.WorkerHandler.class));
-
-        // before the lockdown mode
-        when(mNm.isInLockDownMode()).thenReturn(false);
-        when(r.getSbn()).thenReturn(sbn);
-        mListeners.notifyRemovedLocked(r, 0, rs);
-        mListeners.notifyRemovedLocked(r, 0, rs);
-        verify(r, atLeast(2)).getSbn();
-
-        // in the lockdown mode
-        reset(r);
-        reset(rs);
-        when(mNm.isInLockDownMode()).thenReturn(true);
-        when(r.getSbn()).thenReturn(sbn);
-        mListeners.notifyRemovedLocked(r, 0, rs);
-        mListeners.notifyRemovedLocked(r, 0, rs);
-        verify(r, never()).getSbn();
+        // Neither user0 and user1 is in the lockdown mode
+        when(r0.getUser()).thenReturn(uh0);
+        when(uh0.getIdentifier()).thenReturn(0);
+        when(mNm.isInLockDownMode(0)).thenReturn(false);
+        when(r0.getSbn()).thenReturn(sbn);
+        when(r1.getUser()).thenReturn(uh1);
+        when(uh1.getIdentifier()).thenReturn(1);
+        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        when(r1.getSbn()).thenReturn(sbn);
+        mListeners.notifyRemovedLocked(r0, 0, rs0);
+        mListeners.notifyRemovedLocked(r0, 0, rs0);
+        verify(r0, atLeast(2)).getSbn();
+        mListeners.notifyRemovedLocked(r1, 0, rs1);
+        mListeners.notifyRemovedLocked(r1, 0, rs1);
+        verify(r1, atLeast(2)).getSbn();
+        // Reset
+        reset(r0);
+        reset(rs0);
+        reset(r1);
+        reset(rs1);
+        // Only user 0 is in the lockdown mode
+        when(r0.getUser()).thenReturn(uh0);
+        when(uh0.getIdentifier()).thenReturn(0);
+        when(mNm.isInLockDownMode(0)).thenReturn(true);
+        when(r0.getSbn()).thenReturn(sbn);
+        when(r1.getUser()).thenReturn(uh1);
+        when(uh1.getIdentifier()).thenReturn(1);
+        when(mNm.isInLockDownMode(1)).thenReturn(false);
+        when(r1.getSbn()).thenReturn(sbn);
+        mListeners.notifyRemovedLocked(r0, 0, rs0);
+        mListeners.notifyRemovedLocked(r0, 0, rs0);
+        verify(r0, never()).getSbn();
+        mListeners.notifyRemovedLocked(r1, 0, rs1);
+        mListeners.notifyRemovedLocked(r1, 0, rs1);
+        verify(r1, atLeast(2)).getSbn();
     }
 }

@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.shade
-
 import android.annotation.IdRes
 import android.app.StatusBarManager
-import android.content.Context
-import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.util.Pair
@@ -63,7 +58,6 @@ import com.android.systemui.util.ViewController
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
-
 /**
  * Controller for QS header on Large Screen width (large screen + landscape).
  *
@@ -86,7 +80,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
-    private val context: Context,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(LARGE_SCREEN_BATTERY_CONTROLLER)
     private val batteryMeterViewController: BatteryMeterViewController,
@@ -95,7 +88,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager
 ) : ViewController<View>(header), Dumpable {
-
     companion object {
         /** IDs for transitions and constraints for the [MotionLayout]. These are only used when
          * [Flags.COMBINED_QS_HEADERS] is enabled.
@@ -110,7 +102,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         internal val QS_HEADER_CONSTRAINT = R.id.qs_header_constraint
         @VisibleForTesting
         internal val LARGE_SCREEN_HEADER_CONSTRAINT = R.id.large_screen_header_constraint
-
         private fun Int.stateToString() = when (this) {
             QQS_HEADER_CONSTRAINT -> "QQS Header"
             QS_HEADER_CONSTRAINT -> "QS Header"
@@ -118,29 +109,22 @@ class LargeScreenShadeHeaderController @Inject constructor(
             else -> "Unknown state"
         }
     }
-
     init {
         loadConstraints()
     }
-
     private val combinedHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
-
     private lateinit var iconManager: StatusBarIconController.TintedIconManager
     private lateinit var carrierIconSlots: List<String>
     private lateinit var qsCarrierGroupController: QSCarrierGroupController
-
     private val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
     private val clock: TextView = header.findViewById(R.id.clock)
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
     private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
-
     private var cutoutLeft = 0
     private var cutoutRight = 0
     private var roundedCorners = 0
     private var lastInsets: WindowInsets? = null
-    private var textColorPrimary = Color.TRANSPARENT
-
     private var qsDisabled = false
     private var visible = false
         set(value) {
@@ -150,7 +134,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             field = value
             updateListeners()
         }
-
     /**
      * Whether the QQS/QS part of the shade is visible. This is particularly important in
      * Lockscreen, as the shade is visible but QS is not.
@@ -163,7 +146,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             field = value
             onShadeExpandedChanged()
         }
-
     /**
      * Whether we are in a configuration with large screen width. In this case, the header is a
      * single line.
@@ -176,7 +158,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             field = value
             onHeaderStateChanged()
         }
-
     /**
      * Expansion fraction of the QQS/QS shade. This is not the expansion between QQS <-> QS.
      */
@@ -187,7 +168,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 field = value
             }
         }
-
     /**
      * Expansion fraction of the QQS <-> QS animation.
      */
@@ -198,7 +178,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 updatePosition()
             }
         }
-
     /**
      * Current scroll of QS.
      */
@@ -209,14 +188,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 updateScrollY()
             }
         }
-
     private val insetListener = View.OnApplyWindowInsetsListener { view, insets ->
         updateConstraintsForInsets(view as MotionLayout, insets)
         lastInsets = WindowInsets(insets)
-
         view.onApplyWindowInsets(insets)
     }
-
     private val chipVisibilityListener: ChipVisibilityListener = object : ChipVisibilityListener {
         override fun onChipVisibilityRefreshed(visible: Boolean) {
             if (header is MotionLayout) {
@@ -228,7 +204,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             }
         }
     }
-
     private val configurationControllerListener =
         object : ConfigurationController.ConfigurationListener {
         override fun onConfigChanged(newConfig: Configuration?) {
@@ -244,7 +219,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 )
             }
         }
-
         override fun onDensityOrFontScaleChanged() {
             clock.setTextAppearance(R.style.TextAppearance_QS_Status)
             date.setTextAppearance(R.style.TextAppearance_QS_Status)
@@ -255,33 +229,24 @@ class LargeScreenShadeHeaderController @Inject constructor(
             }
             updateResources()
         }
-
-        override fun onUiModeChanged() {
-            updateResources()
-        }
     }
-
     override fun onInit() {
         if (header is MotionLayout) {
             variableDateViewControllerFactory.create(date as VariableDateView).init()
         }
         batteryMeterViewController.init()
-
         // battery settings same as in QS icons
         batteryMeterViewController.ignoreTunerUpdates()
         batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
-
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
         iconManager.setTint(
             Utils.getColorAttrDefaultColor(header.context, android.R.attr.textColorPrimary)
         )
-
         carrierIconSlots =
             listOf(header.context.getString(com.android.internal.R.string.status_bar_mobile))
         qsCarrierGroupController = qsCarrierGroupControllerBuilder
             .setQSCarrierGroup(qsCarrierGroup)
             .build()
-
         if (!combinedHeaders) {
             // In the new header, we display alarm icon but we ignore it when not using the new
             // headers.
@@ -290,7 +255,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             )
         }
     }
-
     override fun onViewAttached() {
         privacyIconsController.chipVisibilityListener = chipVisibilityListener
         if (header is MotionLayout) {
@@ -300,28 +264,22 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 v.pivotX = newPivot
             }
         }
-
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
-
         updateVisibility()
         updateTransition()
-        updateResources()
     }
-
     override fun onViewDetached() {
         privacyIconsController.chipVisibilityListener = null
         dumpManager.unregisterDumpable(this::class.java.simpleName)
         configurationController.removeCallback(configurationControllerListener)
     }
-
     fun disable(state1: Int, state2: Int, animate: Boolean) {
         val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
         if (disabled == qsDisabled) return
         qsDisabled = disabled
         updateVisibility()
     }
-
     fun startCustomizingAnimation(show: Boolean, duration: Long) {
         header.animate()
                 .setDuration(duration)
@@ -329,7 +287,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 .setInterpolator(if (show) Interpolators.ALPHA_OUT else Interpolators.ALPHA_IN)
                 .start()
     }
-
     private fun loadConstraints() {
         if (header is MotionLayout) {
             // Use resources.getXml instead of passing the resource id due to bug b/205018300
@@ -346,10 +303,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 .load(context, resources.getXml(R.xml.large_screen_shade_header))
         }
     }
-
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {
         val cutout = insets.displayCutout
-
         val sbInsets: Pair<Int, Int> = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
         cutoutLeft = sbInsets.first
         cutoutRight = sbInsets.second
@@ -364,7 +319,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 if (view.isLayoutRtl) cutoutLeft else cutoutRight,
                 header.paddingEnd
             )
-
         if (cutout != null) {
             val topCutout = cutout.boundingRectTop
             if (topCutout.isEmpty || hasCornerCutout) {
@@ -378,16 +332,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
         } else {
            changes += combinedShadeHeadersConstraintManager.emptyCutoutConstraints()
         }
-
         view.updateAllConstraints(changes)
     }
-
     private fun updateScrollY() {
         if (!largeScreenActive && combinedHeaders) {
             header.scrollY = qsScrollY
         }
     }
-
     private fun onShadeExpandedChanged() {
         if (qsVisible) {
             privacyIconsController.startListening()
@@ -397,7 +348,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         updateVisibility()
         updatePosition()
     }
-
     private fun onHeaderStateChanged() {
         if (largeScreenActive || combinedHeaders) {
             privacyIconsController.onParentVisible()
@@ -407,7 +357,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
         updateVisibility()
         updateTransition()
     }
-
     /**
      * If not using [combinedHeaders] this should only be visible on large screen. Else, it should
      * be visible any time the QQS/QS shade is open.
@@ -425,7 +374,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             visible = visibility == View.VISIBLE
         }
     }
-
     private fun updateTransition() {
         if (!combinedHeaders) {
             return
@@ -441,7 +389,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             updateScrollY()
         }
     }
-
     private fun updatePosition() {
         if (header is MotionLayout && !largeScreenActive && visible) {
             Trace.instantForTrack(
@@ -452,7 +399,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             header.progress = qsExpandedFraction
         }
     }
-
     private fun updateListeners() {
         qsCarrierGroupController.setListening(visible)
         if (visible) {
@@ -464,7 +410,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             statusBarIconController.removeIconGroup(iconManager)
         }
     }
-
     private fun updateSingleCarrier(singleCarrier: Boolean) {
         if (singleCarrier) {
             iconContainer.removeIgnoredSlots(carrierIconSlots)
@@ -472,31 +417,12 @@ class LargeScreenShadeHeaderController @Inject constructor(
             iconContainer.addIgnoredSlots(carrierIconSlots)
         }
     }
-
     private fun updateResources() {
         roundedCorners = resources.getDimensionPixelSize(R.dimen.rounded_corner_content_padding)
         val padding = resources.getDimensionPixelSize(R.dimen.qs_panel_padding)
         header.setPadding(padding, header.paddingTop, padding, header.paddingBottom)
         updateQQSPaddings()
-
-        val fillColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-        iconManager.setTint(fillColor)
-        val textColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
-        val colorStateList = Utils.getColorAttr(context, android.R.attr.textColorPrimary)
-        if (textColor != textColorPrimary) {
-            val textColorSecondary = Utils.getColorAttrDefaultColor(context,
-                    android.R.attr.textColorSecondary)
-            textColorPrimary = textColor
-            if (iconManager != null) {
-                iconManager.setTint(textColor)
-            }
-            clock.setTextColor(textColorPrimary)
-            date.setTextColor(textColorPrimary)
-            qsCarrierGroup.updateColors(textColorPrimary, colorStateList)
-            batteryIcon.updateColors(textColorPrimary, textColorSecondary, textColorPrimary)
-        }
     }
-
     private fun updateQQSPaddings() {
         if (header is MotionLayout) {
             val clockPaddingStart = resources
@@ -511,7 +437,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
             )
         }
     }
-
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("visible: $visible")
         pw.println("shadeExpanded: $qsVisible")
@@ -524,13 +449,11 @@ class LargeScreenShadeHeaderController @Inject constructor(
             pw.println("currentState: ${header.currentState.stateToString()}")
         }
     }
-
     private fun MotionLayout.updateConstraints(@IdRes state: Int, update: ConstraintChange) {
         val constraints = getConstraintSet(state)
         constraints.update()
         updateState(state, constraints)
     }
-
     /**
      * Updates the [ConstraintSet] for the case of combined headers.
      *

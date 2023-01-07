@@ -760,6 +760,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         public void hideLyricView(boolean animate) {
             animateHide(getView(), animate);
             animateShow(mLeftSide, animate);
-	}
+	    }
     }
 }
