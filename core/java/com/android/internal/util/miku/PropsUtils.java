@@ -31,78 +31,39 @@ public class PropsUtils {
     private static final String TAG = PropsUtils.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private static volatile boolean sIsGms = false;
-    public static final String PACKAGE_GMS = "com.google.android.gms";
-
-    private static final Map<String, Object> propsToChange;
     private static final Map<String, Object> propsToChangeMeizu;
-    private static final Map<String, ArrayList<String>> propsToKeep;
-    private static final String[] extraPackagesToChange = {
-        "com.android.vending",
-        "com.breel.wallpapers20"
-    };
     private static final String[] meizuPropToChange = {
-            "com.netease.cloudmusic",
-            "com.tencent.qqmusic",
-	    "com.kugou.android",
-	    "cmccwm.mobilemusic",
-	    "cn.kuwo.player",
-	    "com.meizu.media.music"
+        "com.netease.cloudmusic",
+        "com.tencent.qqmusic",
+        "com.kugou.android",
+        "cmccwm.mobilemusic",
+        "cn.kuwo.player",
+        "com.meizu.media.music"
     };
 
     static {
-        propsToKeep = new HashMap<>();
-        propsToKeep.put("com.google.android.settings.intelligence", new ArrayList<String>(Arrays.asList("FINGERPRINT")));
-        propsToChange = new HashMap<>();
-        propsToChange.put("BRAND", "google");
-        propsToChange.put("MANUFACTURER", "Google");
-        propsToChange.put("DEVICE", "redfin");
-        propsToChange.put("PRODUCT", "redfin");
-        propsToChange.put("MODEL", "Pixel 5");
-        propsToChange.put("FINGERPRINT", "google/redfin/redfin:13/TQ1A.230105.001/9292298:user/release-keys");
-	propsToChangeMeizu = new HashMap<>();
-	propsToChangeMeizu.put("BRAND", "meizu");
-	propsToChangeMeizu.put("MANUFACTURER", "meizu");
-	propsToChangeMeizu.put("DEVICE", "meizu18");
-	propsToChangeMeizu.put("PRODUCT", "meizu_18_CN");
-	propsToChangeMeizu.put("MODEL", "MEIZU 18");
-	propsToChangeMeizu.put("FINGERPRINT", "meizu/meizu_18_CN/meizu18:11/RKQ1.201105.002/1607588916:user/release-keys");
+        propsToChangeMeizu = new HashMap<>();
+        propsToChangeMeizu.put("BRAND", "meizu");
+        propsToChangeMeizu.put("MANUFACTURER", "meizu");
+        propsToChangeMeizu.put("DEVICE", "meizu18");
+        propsToChangeMeizu.put("PRODUCT", "meizu_18_CN");
+        propsToChangeMeizu.put("MODEL", "MEIZU 18");
+        propsToChangeMeizu.put("FINGERPRINT", "meizu/meizu_18_CN/meizu18:11/RKQ1.201105.002/1607588916:user/release-keys");
     }
 
     public static void setProps(String packageName) {
         if (packageName == null){
             return;
         }
-        if (packageName.equals(PACKAGE_GMS)) {
-            sIsGms = true;
-            setPropValue("TYPE", "userdebug");
-        }
-        if (packageName.startsWith("com.google.") || Arrays.asList(extraPackagesToChange).contains(packageName)){
+        // Set Props for StatusBar Lyric
+        if(Arrays.asList(meizuPropToChange).contains(packageName)){
             if (DEBUG) Log.d(TAG, "Defining props for: " + packageName);
-            for (Map.Entry<String, Object> prop : propsToChange.entrySet()) {
+            for (Map.Entry<String, Object> prop : propsToChangeMeizu.entrySet()) {
                 String key = prop.getKey();
                 Object value = prop.getValue();
-                if (propsToKeep.containsKey(packageName) && propsToKeep.get(packageName).contains(key)){
-                    if (DEBUG) Log.d(TAG, "Not defining " + key + " prop for: " + packageName);
-                    continue;
-                }
                 if (DEBUG) Log.d(TAG, "Defining " + key + " prop for: " + packageName);
                 setPropValue(key, value);
             }
-        }
-	// Set Props for StatusBar Lyric
-	if(Arrays.asList(meizuPropToChange).contains(packageName)){
-	    if (DEBUG) Log.d(TAG, "Defining props for: " + packageName);
-	    for (Map.Entry<String, Object> prop : propsToChangeMeizu.entrySet()) {
-		String key = prop.getKey();
-		Object value = prop.getValue();
-		if (DEBUG) Log.d(TAG, "Defining " + key + " prop for: " + packageName);
-		setPropValue(key, value);
-	    }
-	}
-        // Set proper indexing fingerprint
-        if (packageName.equals("com.google.android.settings.intelligence")){
-            setPropValue("FINGERPRINT", Build.FINGERPRINT);
         }
     }
 
@@ -115,18 +76,6 @@ public class PropsUtils {
             field.setAccessible(false);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             Log.e(TAG, "Failed to set prop " + key, e);
-        }
-    }
-
-    private static boolean isCallerSafetyNet() {
-        return Arrays.stream(Thread.currentThread().getStackTrace())
-                .anyMatch(elem -> elem.getClassName().contains("DroidGuard"));
-    }
-
-    public static void onEngineGetCertificateChain() {
-        // Check stack for SafetyNet
-        if (sIsGms && isCallerSafetyNet()) {
-            throw new UnsupportedOperationException();
         }
     }
 }
