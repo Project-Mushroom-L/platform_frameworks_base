@@ -294,7 +294,7 @@ public class BluetoothDialog extends SystemUIDialog implements Window.Callback {
         ViewGroup.LayoutParams lp = mTurnOnLayout.getLayoutParams();
         lp.height = mContext.getResources().getDimensionPixelSize(
                 showBackground ? R.dimen.internet_dialog_wifi_network_height
-                : R.dimen.internet_dialog_wifi_toggle_height);
+                : R.dimen.internet_dialog_bt_toggle_height);
         mTurnOnLayout.setLayoutParams(lp);
         mTurnOnLayout.setBackground(showBackground ? mBackgroundOn : null);
         mBluetoothToggleText.setTextAppearance(showBackground
