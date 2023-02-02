@@ -214,7 +214,7 @@ public class BluetoothViewAdapter extends
                 R.dimen.bluetooth_dialog_active_device_bottom_margin) : 0);
             lp.height = mContext.getResources().getDimensionPixelSize(
                 showSummary ? R.dimen.internet_dialog_wifi_network_height
-                : R.dimen.internet_dialog_wifi_toggle_height);
+                : R.dimen.internet_dialog_bt_toggle_height);
             mBluetoothListLayout.setLayoutParams(lp);
 
             mDisconnectIconLayout.setVisibility(device.isConnected() ? View.VISIBLE : View.GONE);
