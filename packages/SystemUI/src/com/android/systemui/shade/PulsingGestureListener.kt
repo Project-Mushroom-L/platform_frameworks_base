@@ -66,7 +66,7 @@ class PulsingGestureListener @Inject constructor(
 
     companion object {
         internal val DOUBLE_TAP_SLEEP_GESTURE =
-            "system:" + Settings.System.DOUBLE_TAP_SLEEP_GESTURE
+            Settings.Secure.DOUBLE_TAP_SLEEP_GESTURE
     }
     private var doubleTapToSleepEnabled = false
     private val quickQsOffsetHeight: Int
