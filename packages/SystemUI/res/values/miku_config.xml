@@ -2,8 +2,6 @@
     <!-- Max visible notification icons -->
     <integer name="config_maxVisibleNotificationIcons">4</integer>
     <integer name="config_maxVisibleNotificationIconsOnLock">3</integer>
-    <!-- Udfps vendor code -->
-    <integer name="config_udfps_vendor_code">0</integer>
     <!-- Doze: does the double tap sensor need a proximity check? -->
     <bool name="doze_double_tap_proximity_check">false</bool>
     <!-- Doze: does the long press sensor need a proximity check? -->
