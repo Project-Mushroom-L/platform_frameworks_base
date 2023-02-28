@@ -11729,6 +11729,14 @@ public final class Settings {
          */
         @Readable
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
+
+        /**
+         * Enable performance mode
+         *
+         * @hide
+         */
+        @Readable
+        public static final String CPU_PERFORMANCE_MODE = "cpu_performance_mode";
         
     }
 
