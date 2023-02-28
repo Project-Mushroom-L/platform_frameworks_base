@@ -11132,6 +11132,14 @@ public final class Settings {
         public static final String STATUS_BAR_SHOW_LYRIC = "status_bar_show_lyric";
 
         /**
+         * Enable performance mode
+         *
+         * @hide
+         */
+        @Readable
+        public static final String CPU_PERFORMANCE_MODE = "cpu_performance_mode";
+
+        /**
          *  Enable statusbar double tap gesture on to put device to sleep
          *  0 = 0ff, 1 = on
          *
