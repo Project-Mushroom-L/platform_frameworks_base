@@ -20,13 +20,11 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
@@ -77,28 +75,20 @@ public class QSCustomizer extends LinearLayout {
         toolbar.setNavigationIcon(
                 getResources().getDrawable(value.resourceId, mContext.getTheme()));
 
-        SpannableString resetText = new SpannableString(
-                mContext.getString(com.android.internal.R.string.reset));
-        resetText.setSpan(new ForegroundColorSpan(isNightMode() ?
-                Color.WHITE : Color.BLACK), 0, resetText.length(), 0);
-        toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, resetText);
+        toolbar.getMenu().add(Menu.NONE, MENU_RESET, 0, com.android.internal.R.string.reset)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         toolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
-    }
 
-    private boolean isNightMode() {
-        return (mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        updateTransparentViewHeight();
     }
 
     void updateResources() {
-        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
-        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
-        mTransparentView.setLayoutParams(lp);
+        updateTransparentViewHeight();
         mRecyclerView.getAdapter().notifyItemChanged(0);
     }
 
@@ -242,5 +232,11 @@ public class QSCustomizer extends LinearLayout {
 
     public boolean isOpening() {
         return mOpening;
+    }
+
+    private void updateTransparentViewHeight() {
+        LayoutParams lp = (LayoutParams) mTransparentView.getLayoutParams();
+        lp.height = QSUtils.getQsHeaderSystemIconsAreaHeight(mContext);
+        mTransparentView.setLayoutParams(lp);
     }
 }
