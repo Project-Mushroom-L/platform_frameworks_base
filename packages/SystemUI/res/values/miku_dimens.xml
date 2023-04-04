@@ -20,4 +20,7 @@
     <dimen name="lyric_icon_margin_end">4dp</dimen>
     <dimen name="lyric_padding_end">4dp</dimen>
 
+    <!-- QQS & QS margin top -->
+    <dimen name="qqs_margin_top">16dp</dimen>
+
 </resources>
