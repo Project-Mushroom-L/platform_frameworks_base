@@ -17,14 +17,14 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Label for UI element which allows deleting the screenshot [CHAR LIMIT=30] -->
-    <string name="screenshot_delete_label">撤销</string>
+    <string name="screenshot_delete_label">削除</string>
     <!-- Content description indicating that tapping the element will allow deleting the screenshot [CHAR LIMIT=NONE] -->
-    <string name="screenshot_delete_description">撤销截图</string>
+    <string name="screenshot_delete_description">スクリーンショットを削除</string>
 
     <!-- Advanced Reboot -->
-    <string name="global_action_restart_advanced">更多</string>
-    <string name="global_action_restart_recovery">前往恢复模式</string>
-    <string name="global_action_restart_bootloader">前往 Bootloader</string>
-    <string name="global_action_restart_ui">重启界面</string>
+    <string name="global_action_restart_advanced">高度な再起動</string>
+    <string name="global_action_restart_recovery">リカバリーで再起動</string>
+    <string name="global_action_restart_bootloader">Bootloader で再起動</string>
+    <string name="global_action_restart_ui">SystemUI を再起動</string>
 
 </resources>
