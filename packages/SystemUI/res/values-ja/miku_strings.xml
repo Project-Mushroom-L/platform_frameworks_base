@@ -24,7 +24,7 @@
     <!-- Advanced Reboot -->
     <string name="global_action_restart_advanced">高度な再起動</string>
     <string name="global_action_restart_recovery">リカバリーで再起動</string>
-    <string name="global_action_restart_bootloader">Bootloader で再起動</string>
-    <string name="global_action_restart_ui">SystemUI を再起動</string>
+    <string name="global_action_restart_bootloader">ブートローダーで再起動</string>
+    <string name="global_action_restart_ui">System UI を再起動</string>
 
 </resources>
