@@ -333,9 +333,6 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
                 com.android.internal.R.bool.config_automatic_brightness_available);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        if (mVibrator == null || !mVibrator.hasVibrator()) {
-            mVibrator = null;
-        }
 
         if (mIcon != null) {
             if (mAutomaticAvailable) {
