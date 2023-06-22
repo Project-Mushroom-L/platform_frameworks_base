@@ -20,7 +20,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.IdRes
 import android.app.StatusBarManager
+import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
@@ -84,6 +87,7 @@ constructor(
     private val privacyIconsController: HeaderPrivacyIconsController,
     private val insetsProvider: StatusBarContentInsetsProvider,
     private val configurationController: ConfigurationController,
+    private val context: Context,
     private val variableDateViewControllerFactory: VariableDateViewController.Factory,
     @Named(SHADE_HEADER) private val batteryMeterViewController: BatteryMeterViewController,
     private val dumpManager: DumpManager,
@@ -120,6 +124,7 @@ constructor(
     private val clock: Clock = header.findViewById(R.id.clock)
     private val date: TextView = header.findViewById(R.id.date)
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
+    private var textColorPrimary = Color.TRANSPARENT
     private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
 
     private var roundedCorners = 0
@@ -270,12 +275,19 @@ constructor(
             qsCarrierGroupControllerBuilder.setQSCarrierGroup(qsCarrierGroup).build()
 
         privacyIconsController.onParentVisible()
+        val configurationChangedListener = object : ConfigurationController.ConfigurationListener {
+            override fun onUiModeChanged() {
+                updateQsResources()
+            }
+        }
+        configurationController.addCallback(configurationChangedListener)
     }
 
     override fun onViewAttached() {
         privacyIconsController.chipVisibilityListener = chipVisibilityListener
         updateVisibility()
         updateTransition()
+        updateQsResources()
 
         header.setOnApplyWindowInsetsListener(insetListener)
 
@@ -388,10 +400,31 @@ constructor(
         }
         updateVisibility()
         updatePosition()
+        updateQsResources()
     }
 
     private fun onHeaderStateChanged() {
         updateTransition()
+        updateQsResources()
+    }
+
+    private fun updateQsResources() {
+        val fillColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+        iconManager.setTint(fillColor)
+        val textColor = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+        val colorStateList = Utils.getColorAttr(context, android.R.attr.textColorPrimary)
+        if (textColor != textColorPrimary) {
+            val textColorSecondary = Utils.getColorAttrDefaultColor(context,
+                    android.R.attr.textColorSecondary)
+            textColorPrimary = textColor
+            if (iconManager != null) {
+                iconManager.setTint(textColor)
+            }
+            clock.setTextColor(textColorPrimary)
+            date.setTextColor(textColorPrimary)
+            qsCarrierGroup.updateColors(textColorPrimary, colorStateList)
+            batteryIcon.updateColors(textColorPrimary, textColorSecondary, textColorPrimary)
+        }
     }
 
     /**
