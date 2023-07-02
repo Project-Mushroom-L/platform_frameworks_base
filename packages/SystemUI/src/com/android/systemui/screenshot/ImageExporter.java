@@ -67,6 +67,9 @@ public class ImageExporter {
     private static final String SCREENSHOTS_PATH = Environment.DIRECTORY_PICTURES
             + File.separator + Environment.DIRECTORY_SCREENSHOTS;
 
+    private static final String SCREENSHOTS_WITH_APP_NAME_PATH = Environment.DIRECTORY_PICTURES
+            + File.separator + Environment.DIRECTORY_SCREENSHOTS + File.separator + "%1$s";
+
     private static final String RESOLVER_INSERT_RETURNED_NULL =
             "ContentResolver#insert returned null.";
     private static final String RESOLVER_OPEN_FILE_RETURNED_NULL =
@@ -145,12 +148,13 @@ public class ImageExporter {
      *
      * @param executor the thread for execution
      * @param bitmap the bitmap to export
+     * @param foregroundAppName the name of app running in foreground
      *
      * @return a listenable future result
      */
     public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            UserHandle owner) {
-        return export(executor, requestId, bitmap, ZonedDateTime.now(), owner);
+            String foregroundAppName, UserHandle owner) {
+        return export(executor, requestId, bitmap, ZonedDateTime.now(), foregroundAppName, owner);
     }
 
     /**
@@ -158,14 +162,15 @@ public class ImageExporter {
      *
      * @param executor the thread for execution
      * @param bitmap the bitmap to export
+     * @param foregroundAppName the name of app running in foreground
      *
      * @return a listenable future result
      */
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            ZonedDateTime captureTime, UserHandle owner) {
+            ZonedDateTime captureTime,  String foregroundAppName, UserHandle owner) {
 
-        final Task task = new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat,
-                mQuality, /* publish */ true, owner, mFlags);
+        final Task task = new Task(mResolver, requestId, bitmap, captureTime, foregroundAppName,
+                mCompressFormat, mQuality, /* publish */ true, owner, mFlags);
 
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
@@ -213,11 +218,12 @@ public class ImageExporter {
         private final int mQuality;
         private final UserHandle mOwner;
         private final String mFileName;
+        private final String mForegroundAppName;
         private final boolean mPublish;
         private final FeatureFlags mFlags;
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
-                CompressFormat format, int quality, boolean publish, UserHandle owner,
+                String foregroundAppName, CompressFormat format, int quality, boolean publish, UserHandle owner,
                 FeatureFlags flags) {
             mResolver = resolver;
             mRequestId = requestId;
@@ -227,6 +233,7 @@ public class ImageExporter {
             mQuality = quality;
             mOwner = owner;
             mFileName = createFilename(mCaptureTime, mFormat);
+            mForegroundAppName = foregroundAppName;
             mPublish = publish;
             mFlags = flags;
         }
@@ -242,7 +249,7 @@ public class ImageExporter {
                     start = Instant.now();
                 }
 
-                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mOwner, mFlags);
+                uri = createEntry(mResolver, mFormat, mCaptureTime, mFileName, mForegroundAppName, mOwner, mFlags);
                 throwIfInterrupted();
 
                 writeImage(mResolver, mBitmap, mFormat, mQuality, uri);
@@ -286,11 +293,11 @@ public class ImageExporter {
     }
 
     private static Uri createEntry(ContentResolver resolver, CompressFormat format,
-            ZonedDateTime time, String fileName, UserHandle owner, FeatureFlags flags)
+            ZonedDateTime time, String fileName, String foregroundAppName, UserHandle owner, FeatureFlags flags)
             throws ImageExportException {
         Trace.beginSection("ImageExporter_createEntry");
         try {
-            final ContentValues values = createMetadata(time, format, fileName);
+            final ContentValues values = createMetadata(time, format, fileName, foregroundAppName);
 
             Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             Uri uriWithUserId = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
@@ -376,9 +383,13 @@ public class ImageExporter {
     }
 
     static ContentValues createMetadata(ZonedDateTime captureTime, CompressFormat format,
-            String fileName) {
+            String fileName, String foregroundAppName) {
         ContentValues values = new ContentValues();
-        values.put(MediaStore.MediaColumns.RELATIVE_PATH, SCREENSHOTS_PATH);
+        if (foregroundAppName != null) {
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, String.format(SCREENSHOTS_WITH_APP_NAME_PATH, foregroundAppName));
+        } else {
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, SCREENSHOTS_PATH);
+        }
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(format));
         values.put(MediaStore.MediaColumns.DATE_ADDED, captureTime.toEpochSecond());
