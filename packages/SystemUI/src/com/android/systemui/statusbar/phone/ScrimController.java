@@ -191,6 +191,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
     private static final float NOT_INITIALIZED = -1;
 
+    private static final float MIKU_ALPHA = 0.0f;
+
     private ScrimState mState = ScrimState.UNINITIALIZED;
 
     private ScrimView mScrimInFront;
@@ -879,7 +881,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     float behindFraction = getInterpolatedFraction();
                     behindFraction = (float) Math.pow(behindFraction, 0.8f);
                     mBehindAlpha = 1;
-                    mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
+                    mNotificationsAlpha = behindFraction * MIKU_ALPHA;
                 } else {
                     if (mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
                         mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
