@@ -6471,4 +6471,6 @@
          unlock pixel-exclusive features -->
     <bool name="config_spoofGoogleApps">true</bool>
 
+    <!-- Whether unlocking and waking a device are sequenced -->
+    <bool name="config_orderUnlockAndWake">false</bool>
 </resources>
