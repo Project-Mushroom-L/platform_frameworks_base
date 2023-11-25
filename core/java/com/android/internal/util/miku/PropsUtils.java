@@ -38,7 +38,8 @@ public class PropsUtils {
         "com.kugou.android",
         "cmccwm.mobilemusic",
         "cn.kuwo.player",
-        "com.meizu.media.music"
+        "com.meizu.media.music",
+        "com.hihonor.cloudmusic"
     };
 
     static {
