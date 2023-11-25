@@ -6456,11 +6456,10 @@
     <!-- Whether to request the approval before commit sessions. -->
     <bool name="config_isPreApprovalRequestAvailable">true</bool>
 
-<<<<<<< HEAD
     <!-- Whether the AOSP support for app cloning building blocks is to be enabled for the
          device. -->
     <bool name="config_enableAppCloningBuildingBlocks">true</bool>
-=======
+
     <!-- Build properties from a GMS certified device against current platform SPL level -->
     <string-array name="config_certifiedBuildProperties" translatable="false">
       <!-- 
@@ -6469,8 +6468,11 @@
         <item>Build.MODEL</item>
         <item>Build.FINGERPRINT</item>
       -->
+        <item>bullhead</item>   <!-- Build.DEVICE -->
+        <item>bullhead</item>   <!-- Build.PRODUCT -->
+        <item>Nexus 5X</item> <!-- Build.MODEL -->
+        <item>google/bullhead/bullhead:8.0.0/OPR6.170623.013/4283548:user/release-keys</item>
     </string-array>
->>>>>>> 77cb6b1a6183 (PIHooks: Make CTS/Play Integrity pass again)
 
     <!-- Build fingerprint from a GMS certified device (against current platform SPL) -->
     <string name="config_certifiedFingerprint" translatable="false">google/raven/raven:13/TP1A.220624.021/8877034:user/release-keys</string>
