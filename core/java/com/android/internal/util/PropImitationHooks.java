@@ -105,12 +105,15 @@ public class PropImitationHooks {
         /* Set certified properties for GMSCore
          * Set stock fingerprint for ARCore
          */
-        if (sCertifiedProps.length == 4 && (sIsGms || sIsFinsky)) {
+        if (sCertifiedProps.length == 7 && (sIsGms || sIsFinsky)) {
             dlog("Spoofing build for GMS");
             setPropValue("DEVICE", sCertifiedProps[0]);
             setPropValue("PRODUCT", sCertifiedProps[1]);
             setPropValue("MODEL", sCertifiedProps[2]);
             setPropValue("FINGERPRINT", sCertifiedProps[3]);
+            setPropValue("MANUFACTURER", sCertifiedProps[4]);
+            setPropValue("BRAND", sCertifiedProps[5]);
+            setPropValue("SECURITY_PATCH", sCertifiedProps[6]);
         } else if (!sStockFp.isEmpty() && packageName.equals(PACKAGE_ARCORE)) {
             dlog("Setting stock fingerprint for: " + packageName);
             setPropValue("FINGERPRINT", sStockFp);
