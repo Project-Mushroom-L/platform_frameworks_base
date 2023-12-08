@@ -125,6 +125,7 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -251,6 +252,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private int mSmallestScreenWidthDp;
     private int mOrientation;
     private final Optional<CentralSurfaces> mCentralSurfacesOptional;
+    private final ShadeController mShadeController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
 
@@ -361,6 +363,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Main Handler handler,
             PackageManager packageManager,
             Optional<CentralSurfaces> centralSurfacesOptional,
+            ShadeController shadeController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
@@ -394,6 +397,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
         mOrientation = resources.getConfiguration().orientation;
         mCentralSurfacesOptional = centralSurfacesOptional;
+        mShadeController = shadeController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
 
@@ -702,7 +706,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 mAdapter, mOverflowAdapter, mSysuiColorExtractor, mStatusBarService,
                 mLightBarController,
                 mNotificationShadeWindowController, this::onRefresh, mKeyguardShowing,
-                mPowerAdapter, mUiEventLogger, mCentralSurfacesOptional, mKeyguardUpdateMonitor,
+                mPowerAdapter, mUiEventLogger, mCentralSurfacesOptional,
+                mShadeController,
+                mKeyguardUpdateMonitor,
                 mLockPatternUtils);
 
         dialog.setOnDismissListener(this);
@@ -921,7 +927,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mUiEventLogger.log(GlobalActionsEvent.GA_EMERGENCY_DIALER_PRESS);
             if (mTelecomManager != null) {
                 // Close shade so user sees the activity
-                mCentralSurfacesOptional.ifPresent(CentralSurfaces::collapseShade);
+                mShadeController.cancelExpansionAndCollapseShade();
                 Intent intent = mTelecomManager.createLaunchEmergencyDialerIntent(
                         null /* number */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -2218,6 +2224,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private UiEventLogger mUiEventLogger;
         private GestureDetector mGestureDetector;
         private Optional<CentralSurfaces> mCentralSurfacesOptional;
+        private final ShadeController mShadeController;
         private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
         private LockPatternUtils mLockPatternUtils;
         private float mWindowDimAmount;
@@ -2291,6 +2298,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 Runnable onRefreshCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
                 Optional<CentralSurfaces> centralSurfacesOptional,
+                ShadeController shadeController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
                 LockPatternUtils lockPatternUtils) {
             // We set dismissOnDeviceLock to false because we have a custom broadcast receiver to
@@ -2308,6 +2316,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
             mCentralSurfacesOptional = centralSurfacesOptional;
+            mShadeController = shadeController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mGestureDetector = new GestureDetector(mContext, mGestureListener);
@@ -2357,12 +2366,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mUiEventLogger.log(GlobalActionsEvent.GA_CLOSE_TAP_OUTSIDE);
             if (mCentralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
                 // match existing lockscreen behavior to open QS when swiping from status bar
-                mCentralSurfacesOptional.ifPresent(
-                        centralSurfaces -> centralSurfaces.animateExpandSettingsPanel(null));
+                mShadeController.animateExpandQs();
             } else {
                 // otherwise, swiping down should expand notification shade
-                mCentralSurfacesOptional.ifPresent(
-                        centralSurfaces -> centralSurfaces.animateExpandNotificationsPanel());
+                mShadeController.animateExpandShade();
             }
             dismiss();
         }

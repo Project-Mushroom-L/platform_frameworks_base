@@ -81,6 +81,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final BiConsumer<Float, Float> mSetExpandedHeight = this::setAppearFraction;
     private final KeyguardBypassController mBypassController;
     private final StatusBarStateController mStatusBarStateController;
+    private final PhoneStatusBarTransitions mPhoneStatusBarTransitions;
     private final CommandQueue mCommandQueue;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
 
@@ -111,6 +112,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             NotificationIconAreaController notificationIconAreaController,
             HeadsUpManagerPhone headsUpManager,
             StatusBarStateController stateController,
+            PhoneStatusBarTransitions phoneStatusBarTransitions,
             KeyguardBypassController bypassController,
             NotificationWakeUpCoordinator wakeUpCoordinator,
             DarkIconDispatcher darkIconDispatcher,
@@ -158,6 +160,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         });
         mBypassController = bypassController;
         mStatusBarStateController = stateController;
+        mPhoneStatusBarTransitions = phoneStatusBarTransitions;
         mWakeUpCoordinator = wakeUpCoordinator;
         mCommandQueue = commandQueue;
         mKeyguardStateController = keyguardStateController;
@@ -205,6 +208,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     @Override
     public void onHeadsUpStateChanged(@NonNull NotificationEntry entry, boolean isHeadsUp) {
         updateHeadsUpAndPulsingRoundness(entry);
+        mPhoneStatusBarTransitions.onHeadsUpStateChanged(isHeadsUp);
     }
 
     private void updateTopEntry() {
