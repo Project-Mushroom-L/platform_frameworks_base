@@ -47,6 +47,7 @@ public class PropImitationHooks {
     private static final String PACKAGE_GMS = "com.google.android.gms";
     private static final String PROCESS_GMS_PERSISTENT = PACKAGE_GMS + ".persistent";
     private static final String PROCESS_GMS_UNSTABLE = PACKAGE_GMS + ".unstable";
+    private static final String VERSION_PREFIX = "VERSION.";
 
     private static final String PACKAGE_GPHOTOS = "com.google.android.apps.photos";
     private static final Map<String, Object> sP1Props = new HashMap<>();
@@ -113,7 +114,7 @@ public class PropImitationHooks {
             setPropValue("FINGERPRINT", sCertifiedProps[3]);
             setPropValue("MANUFACTURER", sCertifiedProps[4]);
             setPropValue("BRAND", sCertifiedProps[5]);
-            setPropValue("SECURITY_PATCH", sCertifiedProps[6]);
+            setPropValue(VERSION_PREFIX + "SECURITY_PATCH", sCertifiedProps[6]);
         } else if (!sStockFp.isEmpty() && packageName.equals(PACKAGE_ARCORE)) {
             dlog("Setting stock fingerprint for: " + packageName);
             setPropValue("FINGERPRINT", sStockFp);
@@ -133,7 +134,13 @@ public class PropImitationHooks {
     private static void setPropValue(String key, Object value){
         try {
             dlog("Setting prop " + key + " to " + value.toString());
-            Field field = Build.class.getDeclaredField(key);
+            Field field;
+            if (key.startsWith(VERSION_PREFIX)) {
+                field = Build.VERSION.class.getDeclaredField(
+                        key.substring(VERSION_PREFIX.length()));
+            } else {
+                field = Build.class.getDeclaredField(key);
+            }
             field.setAccessible(true);
             field.set(null, value);
             field.setAccessible(false);
