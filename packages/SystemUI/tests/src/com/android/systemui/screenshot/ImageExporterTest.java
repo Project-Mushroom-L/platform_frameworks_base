@@ -88,7 +88,7 @@ public class ImageExporterTest extends SysuiTestCase {
     @Test
     public void testImageFilename() {
         assertEquals("image file name", "Screenshot_20201215-131500.png",
-                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG, null));
+                ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG));
     }
 
     @Test
@@ -169,8 +169,8 @@ public class ImageExporterTest extends SysuiTestCase {
 
     @Test
     public void testMediaStoreMetadata() {
-        String name = ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG, null);
-        ContentValues values = ImageExporter.createMetadata(CAPTURE_TIME, CompressFormat.PNG, name);
+        String name = ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG);
+        ContentValues values = ImageExporter.createMetadata(CAPTURE_TIME, CompressFormat.PNG, name, null);
         assertEquals("Pictures/Screenshots",
                 values.getAsString(MediaStore.MediaColumns.RELATIVE_PATH));
         assertEquals("Screenshot_20201215-131500.png",
@@ -196,7 +196,7 @@ public class ImageExporterTest extends SysuiTestCase {
         Mockito.when(mMockContentResolver.insert(uriCaptor.capture(), Mockito.any())).thenReturn(
                 null);
         exporter.export(DIRECT_EXECUTOR, UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814"),
-                null, CAPTURE_TIME, imageUserHande);
+                null, null, imageUserHande);
 
         Uri expected = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         expected = ContentProvider.maybeAddUserId(expected, imageUserHande.getIdentifier());

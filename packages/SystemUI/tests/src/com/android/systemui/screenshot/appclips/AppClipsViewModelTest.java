@@ -99,7 +99,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_throwsError_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(null),
                 eq(USER_HANDLE))).thenReturn(
                 Futures.immediateFailedFuture(new ExecutionException(new Throwable())));
 
@@ -113,7 +113,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_failsSilently_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(null),
                 eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(new ImageExporter.Result()));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);
@@ -128,7 +128,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     public void saveScreenshot_succeeds_shouldUpdateResultWithUri() {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = FAKE_URI;
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), eq(null),
                 eq(USER_HANDLE))).thenReturn(Futures.immediateFuture(result));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT, USER_HANDLE);

@@ -67,6 +67,8 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
+import org.jetbrains.annotations.TestOnly;
+
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -482,6 +484,11 @@ public class NavigationBarController implements
 
     private boolean shouldShowTaskbar() {
         return mTaskbarShowing;
+    }
+
+    @TestOnly
+    public void setTaskbarShowing(boolean b) {
+        mTaskbarShowing = b;
     }
 
     /** @return {@link NavigationBar} on the default display. */

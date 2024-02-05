@@ -22,6 +22,7 @@ import android.service.vr.IVrManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.DisplayTracker
@@ -46,6 +47,7 @@ class BrightnessControllerTest : SysuiTestCase() {
 
     private val executor = FakeExecutor(FakeSystemClock())
     private val secureSettings = FakeSettings()
+    @Mock private lateinit var icon: ImageView
     @Mock private lateinit var toggleSlider: ToggleSlider
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var displayTracker: DisplayTracker
@@ -64,6 +66,7 @@ class BrightnessControllerTest : SysuiTestCase() {
         underTest =
             BrightnessController(
                 context,
+                icon,
                 toggleSlider,
                 userTracker,
                 displayTracker,

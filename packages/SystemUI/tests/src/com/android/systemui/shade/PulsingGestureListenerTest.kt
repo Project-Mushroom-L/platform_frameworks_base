@@ -74,6 +74,8 @@ class PulsingGestureListenerTest : SysuiTestCase() {
     @Mock
     private lateinit var userTracker: UserTracker
     @Mock
+    private lateinit var powerManager: PowerManager
+    @Mock
     private lateinit var dozeInteractor: DozeInteractor
     @Mock
     private lateinit var screenOffAnimationController: ScreenOffAnimationController
@@ -103,8 +105,10 @@ class PulsingGestureListenerTest : SysuiTestCase() {
                 shadeLogger,
                 dozeInteractor,
                 userTracker,
+                powerManager,
                 tunerService,
-                dumpManager
+                dumpManager,
+                context
         )
         whenever(dockManager.isDocked).thenReturn(false)
         whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)

@@ -18,6 +18,7 @@ package com.android.systemui.settings.brightness
 
 import android.testing.AndroidTestingRunner
 import android.view.MotionEvent
+import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -52,6 +53,8 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var brightnessSliderView: BrightnessSliderView
     @Mock
+    private lateinit var icon: ImageView
+    @Mock
     private lateinit var enforcedAdmin: RestrictedLockUtils.EnforcedAdmin
     @Mock
     private lateinit var mirrorController: BrightnessMirrorController
@@ -79,7 +82,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
         whenever(motionEvent.copy()).thenReturn(motionEvent)
 
         mController =
-            BrightnessSliderController(brightnessSliderView, mFalsingManager, uiEventLogger)
+            BrightnessSliderController(brightnessSliderView, icon, mFalsingManager, uiEventLogger)
         mController.init()
         mController.setOnChangedListener(listener)
     }
