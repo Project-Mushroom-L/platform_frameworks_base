@@ -724,7 +724,20 @@ interface IActivityManager {
      *
      * @param userId      The userId in the multi-user environment.
      */
-    void removeApplicationStartInfoCompleteListener(int userId);
+    void clearApplicationStartInfoCompleteListener(int userId);
+
+
+    /**
+     * Adds a timestamp of the moment called to the calling apps most recent
+     * {@link ApplicationStartInfo}.
+     *
+     *
+     * @param key         Unique key for timestamp.
+     * @param timestampNs Clock monotonic time in nanoseconds of event to be
+     *                    recorded.
+     * @param userId      The userId in the multi-user environment.
+     */
+    void addStartInfoTimestamp(int key, long timestampNs, int userId);
 
     /**
      * Return a list of {@link ApplicationExitInfo} records.
@@ -930,6 +943,8 @@ interface IActivityManager {
      */
     boolean isSwipeToScreenshotGestureActive();
 
+    int checkPermissionForDevice(in String permission, int pid, int uid, int deviceId);
+
     /**
      * Notify AMS about binder transactions to frozen apps.
      *
@@ -939,4 +954,6 @@ interface IActivityManager {
      * @param err The binder transaction error
      */
     oneway void frozenBinderTransactionDetected(int debugPid, int code, int flags, int err);
+
+    int getBindingUidProcessState(int uid, in String callingPackage);
 }

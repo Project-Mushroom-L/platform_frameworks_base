@@ -33,6 +33,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.exifinterface.media.ExifInterface;
@@ -64,6 +65,9 @@ public class ImageExporter {
 
     // ex: 'Screenshot_20201215-090626.png'
     private static final String FILENAME_PATTERN = "Screenshot_%1$tY%<tm%<td-%<tH%<tM%<tS.%2$s";
+    // ex: 'Screenshot_20201215-090626-display-1.png'
+    private static final String CONNECTED_DISPLAY_FILENAME_PATTERN =
+            "Screenshot_%1$tY%<tm%<td-%<tH%<tM%<tS-display-%2$d.%3$s";
     private static final String SCREENSHOTS_PATH = Environment.DIRECTORY_PICTURES
             + File.separator + Environment.DIRECTORY_SCREENSHOTS;
 
@@ -153,8 +157,8 @@ public class ImageExporter {
      * @return a listenable future result
      */
     public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            String foregroundAppName, UserHandle owner) {
-        return export(executor, requestId, bitmap, ZonedDateTime.now(), foregroundAppName, owner);
+            String foregroundAppName, UserHandle owner, int displayId) {
+        return export(executor, requestId, bitmap, ZonedDateTime.now(), foregroundAppName, owner, displayId);
     }
 
     /**
@@ -167,10 +171,10 @@ public class ImageExporter {
      * @return a listenable future result
      */
     ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
-            ZonedDateTime captureTime,  String foregroundAppName, UserHandle owner) {
+            ZonedDateTime captureTime,  String foregroundAppName, UserHandle owner, int displayId) {
 
         final Task task = new Task(mResolver, requestId, bitmap, captureTime, foregroundAppName,
-                mCompressFormat, mQuality, /* publish */ true, owner, mFlags);
+                mCompressFormat, mQuality, /* publish */ true, owner, mFlags, displayId);
 
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
@@ -224,7 +228,7 @@ public class ImageExporter {
 
         Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 String foregroundAppName, CompressFormat format, int quality, boolean publish, UserHandle owner,
-                FeatureFlags flags) {
+                FeatureFlags flags, int displayId) {
             mResolver = resolver;
             mRequestId = requestId;
             mBitmap = bitmap;
@@ -232,7 +236,7 @@ public class ImageExporter {
             mFormat = format;
             mQuality = quality;
             mOwner = owner;
-            mFileName = createFilename(mCaptureTime, mFormat);
+            mFileName = createFilename(mCaptureTime, mFormat, displayId);
             mForegroundAppName = foregroundAppName;
             mPublish = publish;
             mFlags = flags;
@@ -378,8 +382,12 @@ public class ImageExporter {
     }
 
     @VisibleForTesting
-    static String createFilename(ZonedDateTime time, CompressFormat format) {
-        return String.format(FILENAME_PATTERN, time, fileExtension(format));
+    static String createFilename(ZonedDateTime time, CompressFormat format, int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            return String.format(FILENAME_PATTERN, time, fileExtension(format));
+        }
+        return String.format(CONNECTED_DISPLAY_FILENAME_PATTERN, time, displayId,
+            fileExtension(format));
     }
 
     static ContentValues createMetadata(ZonedDateTime captureTime, CompressFormat format,

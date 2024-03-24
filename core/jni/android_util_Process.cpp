@@ -148,7 +148,7 @@ jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
 
     const size_t N = name8.size();
     if (N > 0) {
-        const char* str = name8.string();
+        const char* str = name8.c_str();
         for (size_t i=0; i<N; i++) {
             if (str[i] < '0' || str[i] > '9') {
                 struct passwd* pwd = getpwnam(str);
@@ -180,7 +180,7 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 
     const size_t N = name8.size();
     if (N > 0) {
-        const char* str = name8.string();
+        const char* str = name8.c_str();
         for (size_t i=0; i<N; i++) {
             if (str[i] < '0' || str[i] > '9') {
                 struct group* grp = getgrnam(str);
@@ -671,8 +671,8 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
         env->ReleaseStringCritical(name, str);
     }
 
-    if (!name8.isEmpty()) {
-        AndroidRuntime::getRuntime()->setArgv0(name8.string(), true /* setProcName */);
+    if (!name8.empty()) {
+        AndroidRuntime::getRuntime()->setArgv0(name8.c_str(), true /* setProcName */);
     }
 }
 
@@ -778,7 +778,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         return;
     }
 
-    int fd = open(file.string(), O_RDONLY | O_CLOEXEC);
+    int fd = open(file.c_str(), O_RDONLY | O_CLOEXEC);
 
     if (fd >= 0) {
         //ALOGI("Clearing %" PRId32 " sizes", count);
@@ -792,7 +792,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
         close(fd);
 
         if (len < 0) {
-            ALOGW("Unable to read %s", file.string());
+            ALOGW("Unable to read %s", file.c_str());
             len = 0;
         }
         buffer[len] = 0;
@@ -805,7 +805,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
             //ALOGI("Parsing at: %s", p);
             for (i=0; i<count; i++) {
                 const String8& field = fields[i];
-                if (strncmp(p, field.string(), field.length()) == 0) {
+                if (strncmp(p, field.c_str(), field.length()) == 0) {
                     p += field.length();
                     while (*p == ' ' || *p == '\t') p++;
                     char* num = p;
@@ -817,7 +817,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                     }
                     char* end;
                     sizesArray[i] = strtoll(num, &end, 10);
-                    //ALOGI("Field %s = %" PRId64, field.string(), sizesArray[i]);
+                    // ALOGI("Field %s = %" PRId64, field.c_str(), sizesArray[i]);
                     foundCount++;
                     break;
                 }
@@ -834,7 +834,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
 
         free(buffer);
     } else {
-        ALOGW("Unable to open %s", file.string());
+        ALOGW("Unable to open %s", file.c_str());
     }
 
     //ALOGI("Done!");
@@ -1333,7 +1333,7 @@ jint android_os_Process_sendSignalToProcessGroup(JNIEnv* env, jobject clazz, jin
 
 void android_os_Process_removeAllProcessGroups(JNIEnv* env, jobject clazz)
 {
-    return removeAllProcessGroups();
+    return removeAllEmptyProcessGroups();
 }
 
 static jint android_os_Process_nativePidFdOpen(JNIEnv* env, jobject, jint pid, jint flags) {
