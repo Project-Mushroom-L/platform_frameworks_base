@@ -211,7 +211,7 @@ public class ImageExporterTest extends SysuiTestCase {
         Mockito.when(mMockContentResolver.insert(uriCaptor.capture(), Mockito.any())).thenReturn(
                 null);
         exporter.export(DIRECT_EXECUTOR, UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814"),
-                null, null, CAPTURE_TIME, imageUserHande, Display.DEFAULT_DISPLAY);
+                null, CAPTURE_TIME, "", imageUserHande, Display.DEFAULT_DISPLAY);
 
         Uri expected = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         expected = ContentProvider.maybeAddUserId(expected, imageUserHande.getIdentifier());

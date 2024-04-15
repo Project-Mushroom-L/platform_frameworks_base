@@ -345,6 +345,11 @@ public class NavigationBarControllerImpl implements
         return mTaskbarShowing;
     }
 
+    @VisibleForTesting
+    protected void setTaskbarShowing(boolean b) {
+        mTaskbarShowing = b;
+    }
+
     @Override
     public void createNavigationBars(final boolean includeDefaultDisplay,
             RegisterStatusBarResult result) {
