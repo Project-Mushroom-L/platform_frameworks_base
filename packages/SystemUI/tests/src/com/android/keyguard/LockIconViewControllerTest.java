@@ -369,8 +369,6 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         // THEN uses perform haptic feedback
         verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
     }
-<<<<<<< HEAD
-=======
 
     @Test
     public void longPress_showBouncer_sceneContainerNotEnabled() {
@@ -413,5 +411,5 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         verify(mDeviceEntryInteractor, never()).attemptDeviceEntry();
         verify(mKeyguardViewController, never()).showPrimaryBouncer(anyBoolean());
     }
->>>>>>> 378466bed3dc5d28851ae521d6bc3c78a8136f26
+
 }
