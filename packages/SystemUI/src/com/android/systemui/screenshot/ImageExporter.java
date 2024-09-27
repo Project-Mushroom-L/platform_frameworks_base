@@ -156,6 +156,24 @@ public class ImageExporter {
      *
      * @param executor  the thread for execution
      * @param bitmap    the bitmap to export
+     * @param displayId the display id the bitmap comes from.
+     * @return a listenable future result
+     */
+    public ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
+                                           UserHandle owner, int displayId) {
+        ZonedDateTime captureTime = ZonedDateTime.now(ZoneId.systemDefault());
+        return export(executor,
+                new Task(mResolver, requestId, bitmap, captureTime, null, mCompressFormat,
+                        mQuality, /* publish */ true, owner, mFlags,
+                        createFilename(captureTime, mCompressFormat, displayId)));
+    }
+
+    /**
+     * Export the image using the given executor with an auto-generated file name based on display
+     * id.
+     *
+     * @param executor  the thread for execution
+     * @param bitmap    the bitmap to export
      * @param foregroundAppName the name of app running in foreground
      * @param displayId the display id the bitmap comes from.
      * @return a listenable future result
