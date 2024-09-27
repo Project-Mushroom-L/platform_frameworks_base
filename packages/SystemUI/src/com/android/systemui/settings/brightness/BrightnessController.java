@@ -59,7 +59,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import dagger.assisted.Assisted;
@@ -70,7 +69,7 @@ import java.util.concurrent.Executor;
 
 public class BrightnessController implements ToggleSlider.Listener, MirroredBrightnessController {
     private static final String TAG = "CentralSurfaces.BrightnessController";
-    private static final int SLIDER_ANIMATION_DURATION = 1000;
+    private static final int SLIDER_ANIMATION_DURATION = 3000;
 
     private static final int MSG_UPDATE_ICON = 0;
     private static final int MSG_UPDATE_SLIDER = 1;
@@ -107,6 +106,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     };
 
     private volatile boolean mAutomatic;  // Brightness adjusted automatically using ambient light.
+    private boolean mTrackingTouch = false; // Brightness adjusted via touch events.
     private volatile boolean mIsVrModeEnabled;
     private boolean mListening;
     private boolean mExternalChange;
@@ -121,7 +121,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
             VibrationEffect.get(VibrationEffect.EFFECT_TICK);
 
     @Override
-    public void setMirror(BrightnessMirrorController controller) {
+    public void setMirror(@Nullable MirrorController controller) {
         mControl.setMirrorControllerAndMirror(controller);
     }
 
@@ -150,14 +150,14 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         public void startObserving() {
             if (!mObserving) {
                 mObserving = true;
-                mSecureSettings.registerContentObserverForUser(
+                mSecureSettings.registerContentObserverForUserSync(
                         BRIGHTNESS_MODE_URI,
                         false, this, UserHandle.USER_ALL);
             }
         }
 
         public void stopObserving() {
-            mSecureSettings.unregisterContentObserver(this);
+            mSecureSettings.unregisterContentObserverSync(this);
             mObserving = false;
         }
 
@@ -374,6 +374,7 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
 
     @Override
     public void onChanged(boolean tracking, int value, boolean stopTracking) {
+        mTrackingTouch = tracking;
         if (mExternalChange) return;
 
         if (mSliderAnimator != null) {
@@ -464,6 +465,12 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
         }
     }
 
+    private boolean triggeredByBrightnessKey() {
+        // When the brightness mode is manual and the user isn't changing the brightness via the
+        // brightness slider, assume changes are coming from a brightness key.
+        return !mAutomatic && !mTrackingTouch;
+    }
+
     private void updateSlider(float brightnessValue, boolean inVrMode) {
         final float min = mBrightnessMin;
         final float max = mBrightnessMax;
@@ -485,12 +492,13 @@ public class BrightnessController implements ToggleSlider.Listener, MirroredBrig
     }
 
     private void animateSliderTo(int target) {
-        if (!mControlValueInitialized || !mControl.isVisible()) {
+        if (!mControlValueInitialized || !mControl.isVisible() || triggeredByBrightnessKey()) {
             // Don't animate the first value since its default state isn't meaningful to users.
             // We also don't want to animate slider if it's not visible - especially important when
             // two sliders are active at the same time in split shade (one in QS and one in QQS),
             // as this negatively affects transition between them and they share mirror slider -
-            // animating it from two different sources causes janky motion
+            // animating it from two different sources causes janky motion.
+            // Don't animate if the value is changed via the brightness keys of a keyboard.
             mControl.setValue(target);
             mControlValueInitialized = true;
         }
